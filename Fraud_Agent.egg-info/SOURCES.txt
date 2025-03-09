@@ -1,0 +1,11 @@
+README.md
+setup.py
+Fraud_Agent/__init__.py
+Fraud_Agent/agent.py
+Fraud_Agent/class_definitions.py
+Fraud_Agent/prompt.py
+Fraud_Agent.egg-info/PKG-INFO
+Fraud_Agent.egg-info/SOURCES.txt
+Fraud_Agent.egg-info/dependency_links.txt
+Fraud_Agent.egg-info/requires.txt
+Fraud_Agent.egg-info/top_level.txt
