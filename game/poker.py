@@ -8,7 +8,7 @@ import ui
 import dealer
 from player import Player
 from ui.cli.terminal import Terminal
-from ui.cli.terminal_manager import TerminalManager
+from ui.cli.terminal_manager import TerminalManager, TerminalWindow
 import curses
 import sys
 import subprocess
@@ -23,8 +23,8 @@ class Game(object):
         self.players = []
         self.dealer = dealer.Dealer()
         self.screen = None
-        self.chat = Terminal("Main Chat", 10, 40, 0, 45)
         self.terminal_manager = TerminalManager()
+        self.game_display = TerminalWindow("Game Display")  # Add game display window
 
     def createPlayers(self):
         name = ui.nameQuest()
@@ -106,19 +106,22 @@ class Game(object):
 
     def printSituation(self, table=False):
         """
-        Prints out whole situation in the game.
+        Prints out whole situation in the game to the game display window.
         """
+        output = []
+        output.append(f"\n=== Round {self.rounds} ===")
+        
         # Print all bot hands for simulation
         for bot in self.players:
-            print(f"\n{bot.name}'s cards:")
-            ui.cards(bot.hand)
-            print(f"Money: {bot.money}")
+            output.append(f"\n{bot.name}'s cards: {str(bot.hand)}")
+            output.append(f"Money: {bot.money}")
         
         if table:
-            print("\nCommunity cards:")
-            ui.cards(table)
-        print()
-        return self
+            output.append("\nCommunity cards:")
+            output.append(str(table))
+        
+        # Send to game display window
+        self.terminal_manager.write_game_display("\n".join(output))
 
     def allCards(self):
         """

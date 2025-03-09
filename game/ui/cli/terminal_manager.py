@@ -134,10 +134,16 @@ while True:
 class TerminalManager:
     def __init__(self):
         self.chat_window = TerminalWindow("Main Chat")
+        self.game_display = TerminalWindow("Game Display")  # Add game display window
         self.thought_windows = {}
         self.fallback_mode = False
         
     def start_terminals(self, players):
+        # Try to start game display window first
+        if not self.game_display.start():
+            self.fallback_mode = True
+            print("\n=== Game Display ===")
+            
         # Try to start chat window
         if not self.chat_window.start():
             self.fallback_mode = True
@@ -151,6 +157,12 @@ class TerminalManager:
             if not self.fallback_mode and not thought_window.start():
                 self.fallback_mode = True
                 print(f"\n=== {player.name}'s Thoughts ===")
+                
+    def write_game_display(self, message):
+        if self.fallback_mode:
+            print(f"\n[Game Display] {message}")
+        else:
+            self.game_display.write(message)
             
     def write_chat(self, message):
         if self.fallback_mode:
@@ -166,6 +178,7 @@ class TerminalManager:
             
     def close_all(self):
         if not self.fallback_mode:
+            self.game_display.close()  # Add game display window cleanup
             self.chat_window.close()
             for window in self.thought_windows.values():
                 window.close() 
