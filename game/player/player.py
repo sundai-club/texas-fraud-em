@@ -10,6 +10,7 @@ from sys import path,exit
 ui_package = p.abspath("..") + "/ui"
 path.append(ui_package)
 from ui import optionsInput, raising,allInOrFold
+from ui.cli.terminal import Terminal
 
 class Player(object):
     def __init__(self, name = "Player", money = 500.0):
@@ -18,8 +19,9 @@ class Player(object):
         self.handValue = 0.0
         self.hand = []
         self.deposit = 0.0 #how much money player spent in one game
-        self.bet = 0.0 #how much money is needed for one player to stay in game
-        #bet - deposit is debt
+        self.bet = 0.0     #how much money is needed for one player to stay in game
+        self.thoughts = Terminal(f"{name}'s Thoughts", 10, 40, 0, 0)
+        self.chat = None  # Will be set by Game class
     
     @property
     def debt(self):
