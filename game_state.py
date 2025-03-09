@@ -29,13 +29,14 @@ class Card:
     value: CardValue
     suit: CardSuit
 
+@dataclass
+class Raise:
+    amount: int
 
-class Action(Enum):
-    FOLD = "fold"
-    CALL = "call"
-    RAISE = "raise"
-    CHECK = "check"
-    ALL_IN = "all in"
+@dataclass
+class Action():
+    fold: bool
+    increase: Raise
 
 @dataclass
 class Player:
@@ -61,14 +62,42 @@ class ActionHistory:
 @dataclass
 class GameState:
     table: list[Card]
-    players: dict[str,Player]
+    players: dict[str, Player]
     chat: Chat
     pot: int
+    action_history: ActionHistory
+    deck: list[Card]
+    num: int = 5
 
-    def to_json(self):
+    def create_players(self) -> 'GameState':
+        pass
+
+    def start_game(self) -> 'GameState':
+        self.shuffle_cards()
+        self.deal_cards()
+        return self
+
+    def set_cards(self) -> 'GameState':
+        pass
+
+    def deal_cards(self) -> 'GameState':
+        pass
+
+    def shuffle_cards(self) -> 'GameState':
+        pass
+
+    def simulation_step(self) -> 'GameState':
+        pass
+
+    def query_llm(self) -> 'LLMResponse':
+        pass
+
+    def to_json(self) -> dict:
         pass
 
 class LLMResponse:
     action: Action
     thoughts: str
     response: str
+
+
