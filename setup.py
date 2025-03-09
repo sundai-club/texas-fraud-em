@@ -1,4 +1,15 @@
-import os
+from setuptools import setup, find_packages
+
+setup(
+    name="Fraud_Agent",
+    version="0.1",
+    packages=find_packages(),
+    install_requires=[
+        "openai",
+        "pydantic",
+        "python-dotenv"
+    ],
+) import os
 from setuptools import setup
 
 # Utility function to read the README file.
