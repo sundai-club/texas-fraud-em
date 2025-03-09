@@ -105,3 +105,5 @@ venv.bak/
 
 # swap backup file
 .py.swp
+*.env.env
+.env
