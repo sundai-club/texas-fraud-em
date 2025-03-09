@@ -48,8 +48,20 @@ class Game(object):
         """
         while True:
             players = self.players[:]
-            for index,player in enumerate(players[:]):
-                record = player.options()
+            for index, player in enumerate(players[:]):
+                # Create game state dictionary
+                game_state = {
+                    'pot_size': self.dealer.playerControl.pot,
+                    'table_cards': self.dealer.cardControl.tableCards,
+                    'active_players': len(players),
+                    'position': index / len(players),  # Simplified position
+                }
+                
+                # Pass game state to options() for bots
+                if hasattr(player, 'options'):
+                    record = player.options(game_state)
+                else:
+                    record = player.options()
                 index = (index+1) % len(self.players) 
                 self.players[index].bet = record[0]
                 if record[1] == -1:
