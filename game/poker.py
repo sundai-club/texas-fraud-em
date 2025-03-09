@@ -4,6 +4,7 @@ Author: dave
 Github: https://github.com/davidus27
 Description: Game is the main Object implementing all the necessary tools for playing. Game is created in function main()
 """
+import json
 import ui
 import dealer
 from player import Player
@@ -47,7 +48,7 @@ class Game(object):
 
         """
         while True:
-            players = self.players[:]
+            players: list[Player] = self.players[:]
             for index, player in enumerate(players[:]):
                 # Create game state dictionary
                 game_state = {
@@ -55,7 +56,10 @@ class Game(object):
                     'table_cards': self.dealer.cardControl.tableCards,
                     'active_players': len(players),
                     'position': index / len(players),  # Simplified position
+                    'players': [player.to_json() for player in players],
                 }
+
+                print(json.dumps(game_state, indent=4, sort_keys=True))
                 
                 # Pass game state to options() for bots
                 if hasattr(player, 'options'):

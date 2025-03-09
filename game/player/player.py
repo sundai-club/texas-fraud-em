@@ -130,6 +130,15 @@ class Player(object):
        money = self.money
        self.money = 0
        return (-1,money)
+    
+    def to_json(self):
+        return {
+            "name": self.name,
+            "money": self.money,
+            "deposit": self.deposit,
+            "bet": self.bet,
+            "hand": [{"value": card[0], "suit": card[1]} for card in self.hand],
+        }
 
     def quit(self):
         print("Exiting program. Hope you will come back again.")

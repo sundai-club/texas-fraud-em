@@ -57,6 +57,8 @@ class EasyBot(player.Player):
                    3: self.raiseBet,
                    4: self.foldBet,
                    5: self.allin}
+        
+        
 
         # Get game state variables with defaults
         pot_size = game_state.get('pot_size', 0)
