@@ -2,44 +2,47 @@
 
 import poker
 from os import system
+from time import sleep
+
 def main():
     """ 
-    Work to create game
+    Work to create game simulation
     """
     game = poker.Game()
     system("clear")
-    print("Let's play Texas Hold'em!\n")
-    allPlayers = game.createPlayers()
+    print("Simulating Texas Hold'em with bots!\n")
+    
+    # Create 4 bots automatically
+    allPlayers = game.dealer.playerControl.createPlayers(numPlayers=4)
+    
     while True:
-        #The simple game functioning:
-        #Players bets on preflop (before the release of firt three cards)
-        #First three cards are released
-        #Another beting
-        #Turn-fourth card release
-        #Another bets
-        #River-final card
-        #Last beting
-        #Showdown-cards are showed (if any players are left)
-        print("\n\n\tRound #", game.rounds, end="\n\n") 
+        print("\n\n\tRound #", game.rounds, end="\n\n")
         game.players = list(allPlayers)
         
         game.dealer.gameOn()
         game.dealer.giveCards()
+        
+        # Show initial state
+        print("\n--- Initial Deal ---")
+        game.printSituation()
+        sleep(2)  # Add delay to make simulation readable
+        
+        # Play the round
         game.eachRound()
-        #Showdown
+        
+        # Showdown
         print("\n\t\tShowdown\n")
         game.showdown()
         game.dealer.endGame()
+        
         if len(game.dealer.playerControl.players) == 1:
             print("Final winner is:", game.dealer.playerControl.players[0].name)
             print("Money: ", game.dealer.playerControl.players[0].money)
             break
-        input("Press Enter to continue.")
+            
+        sleep(3)  # Add delay between rounds
         system("clear")
-        
-        
         game.rounds += 1
-        
 
 if __name__ == "__main__":
     main()

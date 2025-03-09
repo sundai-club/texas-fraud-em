@@ -70,18 +70,17 @@ class Game(object):
     def printSituation(self, table=False):
         """
         Prints out whole situation in the game.
-        :returns: TODO
-
         """
-        if type(self.players[0]) == Player:
-            ui.info(self.dealer.playerControl.players[0].name, self.dealer.playerControl.players[0].money)
-            print("Your cards:")
-            ui.cards(self.dealer.playerControl.players[0].hand)
-            print()
-            if table:
-                print("Community cards:")
-                ui.cards(table)
-                print()
+        # Print all bot hands for simulation
+        for bot in self.players:
+            print(f"\n{bot.name}'s cards:")
+            ui.cards(bot.hand)
+            print(f"Money: {bot.money}")
+        
+        if table:
+            print("\nCommunity cards:")
+            ui.cards(table)
+        print()
         return self
 
     def allCards(self):

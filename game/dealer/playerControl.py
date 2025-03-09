@@ -28,12 +28,15 @@ class PlayerControl(object):
             player.clearDebt()
         return self
     
-    def createPlayers(self, name = "Player0", numPlayers=2,money=500.0, difficulty="easy"):
-        self.addPlayer(player.Player(name, money))
-        for i in range(1,numPlayers+1):
-            if difficulty == "easy":
-               self.addPlayer(player.EasyBot())
-               self.players[i].name +=str(i)
+    def createPlayers(self, name = "Bot0", numPlayers=4, money=500.0, difficulty="easy"):
+        # Start with first bot instead of human player
+        self.addPlayer(player.EasyBot())
+        self.players[0].name = "Bot0"
+        
+        # Add remaining bots
+        for i in range(1, numPlayers):
+            self.addPlayer(player.EasyBot())
+            self.players[i].name = f"Bot{i}"
         return self.players
 
     def givePot(self,players):
