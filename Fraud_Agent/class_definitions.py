@@ -1,9 +1,10 @@
 from typing import Dict, Any, Optional
 from dataclasses import dataclass
+from pydantic import BaseModel, Field
 
 # Import relevant classes from game_state_bill.py
 # These imports assume game_state_bill.py is accessible in the import path
-from game_state_bill import GameState, Player, Chat, Action, ChatMessage
+from game_state_bill import GameState, Player, Chat, Action, ChatMessage, Raise
 
 @dataclass
 class inputClass:
@@ -27,42 +28,15 @@ class inputClass:
         """Returns the player information"""
         return self.player
 
-@dataclass
-class outputClass:
-    """
-    Output class for the fraud agent.
-    Contains the action to take, a chat message to send, and the agent's thoughts.
-    """
-    action: Action
-    chat_message: ChatMessage
-    thoughts: str
-    error: Optional[str] = None
+class outputClass(BaseModel):
+    # Action fields
+    fold: bool = Field(..., description="Whether to fold (true) or not (false)")
+    raise_amount: int = Field(..., description="Amount to raise if not folding")
     
-    def get_action(self) -> Action:
-        """Returns the action to take"""
-        return self.action
+    # Chat Message fields
+    message: str = Field(..., description="Message to send to the chat")
+    player_id: str = Field(..., description="ID of the player sending the message")
     
-    def get_chat_message(self) -> ChatMessage:
-        """Returns the chat message to send"""
-        return self.chat_message
-    
-    def get_thoughts(self) -> str:
-        """Returns the agent's thoughts on the decision"""
-        return self.thoughts
-    
-    def get_output(self) -> Dict[str, Any]:
-        """Returns the complete output as a dictionary"""
-        output = {
-            "action": self.action,
-            "chat_message": self.chat_message,
-            "thoughts": self.thoughts
-        }
-        
-        if self.error is not None:
-            output["error"] = self.error
-            
-        return output
-    
-    def has_error(self) -> bool:
-        """Check if there was an error during processing"""
-        return self.error is not None
+    # Thoughts and error fields
+    thoughts: str = Field(..., description="Agent's reasoning for the decision")
+    error: Optional[str] = Field(None, description="Error message if something went wrong")

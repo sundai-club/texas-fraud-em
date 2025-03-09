@@ -12,14 +12,6 @@ load_dotenv()
 from Fraud_Agent.class_definitions import inputClass, outputClass
 from game_state_bill import Action, Raise, ChatMessage
 
-# Pydantic model for structured AI output
-class FraudAction(BaseModel):
-    # This maybe should just be our outputClass???
-    fold: bool = Field(..., description="Whether to fold (true) or not (false)")
-    raise_amount: int = Field(0, description="Amount to raise if not folding")
-    chat_message: str = Field(..., description="Message to send to the chat")
-    thoughts: str = Field(..., description="Agent's reasoning for the decision")
-
 def process_game_decision(input_data: inputClass, system_prompt: str) -> outputClass:
     """
     Simple function that takes game state and player state, calls OpenAI API,
@@ -37,8 +29,10 @@ def process_game_decision(input_data: inputClass, system_prompt: str) -> outputC
     if not api_key:
         print("Warning: OpenAI API key not found. Please set OPENAI_API_KEY in your .env file.")
         return outputClass(
-            action=Action(fold=True, increase=Raise(amount=0)),
-            chat_message=ChatMessage(player=input_data.player, message="Error: API key missing"),
+            fold=True,
+            raise_amount=0,
+            message="Error: API key missing",
+            player_id=input_data.player.id,
             thoughts="Error: OpenAI API key not found in environment variables",
             error="OpenAI API key not found in environment variables"
         )
@@ -69,46 +63,26 @@ def process_game_decision(input_data: inputClass, system_prompt: str) -> outputC
     
     # Call OpenAI API
     try:
-        response = client.chat.completions.create(
-            model="gpt-4-turbo",
-            response_format={"type": "json_object"},
+        completion = client.beta.chat.completions.parse(
+            model="gpt-4o-2024-08-06",
             messages=[
                 {"role": "system", "content": system_message},
                 {"role": "user", "content": f"Game State: {game_state_info}\nPlayer Info: {player_info}\nRecent Chat: {chat_history}"}
             ],
-            temperature=0.2,
-            response_model=FraudAction,
+            response_format=outputClass,
+            temperature=0.2
         )
         
-        # Parse the response into our Pydantic model
-        #TBD if this is still needed with response_model=FraudAction
-        content = response.choices[0].message.content
-        action_data = FraudAction.model_validate_json(content)
-        
-        # # Create Action object
-        # action = Action(
-        #     fold=action_data.fold,
-        #     increase=Raise(amount=action_data.raise_amount)
-        # )
-        
-        # # Create ChatMessage object
-        # chat_message = ChatMessage(
-        #     player=input_data.player,
-        #     message=action_data.chat_message
-        # )
-        
-        # Create output object
-       
-        print(response)
-        return outputClass(
-            action=action_data
-        )
+        # Return the parsed response directly
+        return completion.choices[0].message.parsed
         
     except Exception as e:
         # Handle errors
         return outputClass(
-            action=Action(fold=True, increase=Raise(amount=0)),
-            chat_message=ChatMessage(player=input_data.player, message="I need to fold."),
+            fold=True,
+            raise_amount=0,
+            message="I need to fold.",
+            player_id=input_data.player.id,
             thoughts="Error occurred during processing",
             error=f"Error processing decision: {str(e)}"
         )
@@ -211,10 +185,10 @@ def main():
     
     # Print the results
     print("\nFraud Agent Decision:")
-    print(f"Action: {result.get_action()}")
-    print(f"Chat Message: {result.get_chat_message()}")
-    print(f"Thoughts: {result.get_thoughts()}")
-    if result.has_error():
+    print(f"Action: fold={result.fold}, raise_amount={result.raise_amount}")
+    print(f"Chat Message: {result.message}")
+    print(f"Thoughts: {result.thoughts}")
+    if result.error:
         print(f"Error: {result.error}")
 
 if __name__ == "__main__":
