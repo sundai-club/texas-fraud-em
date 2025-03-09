@@ -1,3 +1,4 @@
+from typing import Callable
 import player.player 
 from random import random,randint
 
@@ -52,52 +53,25 @@ class EasyBot(player.Player):
         if game_state is None:
             game_state = {}
         
-        options = {1: self.checkBet,
-                   2: self.callBet, 
-                   3: self.raiseBet,
-                   4: self.foldBet,
-                   5: self.allin}
+
+
+        options = {'check': self.checkBet,
+                   'call': self.callBet, 
+                   'raise': self.raiseBet,
+                   'fold': self.foldBet,
+                   'allin': self.allin}
+    
+        action = self.select_action(options, game_state)
+        chosen = options[action]()
+        return chosen
+    
+    def select_action(self, 
+                      options: dict[str, Callable], 
+                      game_state: dict[str, dict | str]) -> str:
+        baseline_action = random.choice(list(options.keys()))
         
-        
 
-        # Get game state variables with defaults
-        pot_size = game_state.get('pot_size', 0)
-        table_cards = game_state.get('table_cards', [])
-        active_players = game_state.get('active_players', 1)
-        position = game_state.get('position', 0)  # 0 is early, 1 is late
-        round = game_state.get('round', 'preflop')
-
-        while True:
-            # Calculate pot odds and hand strength
-            pot_odds = self.debt / (pot_size + self.debt) if self.debt > 0 else 0
-            hand_strength = self._evaluate_hand(table_cards)
-
-            # All-in or fold situation
-            if self.bet == -1:
-                if hand_strength > 0.7 or (self.money / pot_size < 0.2):
-                    action = 5  # all-in
-                else:
-                    action = 4  # fold
-            
-            # Normal betting situation    
-            else:
-                if pot_odds > hand_strength:
-                    action = 4  # fold
-                elif self.debt == 0:
-                    if hand_strength > 0.8:
-                        action = 3  # raise
-                    else:
-                        action = 1  # check
-                else:
-                    if hand_strength > 0.6:
-                        action = 2  # call
-                    else:
-                        action = 4  # fold
-
-            chosen = options[action]()
-            if chosen:
-                return chosen
-            continue
+        return baseline
 
     def _evaluate_hand(self, table_cards):
         """
