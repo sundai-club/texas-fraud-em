@@ -1,6 +1,22 @@
+import json
 from typing import Callable
 import player.player 
 from random import random,randint
+import os
+import sys
+from typing import Dict, Any
+from pydantic import BaseModel, Field
+import openai
+from dotenv import load_dotenv
+
+load_dotenv()
+
+client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+class Action(BaseModel):
+    action: str = Field(description="The action to take")
+    thoughts: str = Field(description="The thoughts of the player")
+
 
 class EasyBot(player.Player):
 
@@ -54,12 +70,12 @@ class EasyBot(player.Player):
             game_state = {}
         
 
-
         options = {'check': self.checkBet,
                    'call': self.callBet, 
                    'raise': self.raiseBet,
                    'fold': self.foldBet,
                    'allin': self.allin}
+        
     
         action = self.select_action(options, game_state)
         chosen = options[action]()
@@ -68,10 +84,25 @@ class EasyBot(player.Player):
     def select_action(self, 
                       options: dict[str, Callable], 
                       game_state: dict[str, dict | str]) -> str:
-        baseline_action = random.choice(list(options.keys()))
         
+        # baseline_action = random.choice(list(options.keys()))
+        action = self.call_llm(game_state, options).action
 
-        return baseline
+        return action
+    
+    def call_llm(self, game_state: dict[str, dict | str], options: dict[str, Callable]) -> str:
+
+        game_state_json = json.dumps(game_state, indent=4)
+        completion = client.beta.chat.completions.parse(
+            model="gpt-4o-2024-08-06",
+            messages=[
+                {"role": "user", "content": f"Game State: {game_state_json}\nPlayer Info: chose one function you want to return from options: {options}, RETURN only one word of a"}
+            ],
+            response_format=Action
+        )
+
+        return completion.choices[0].message.parsed
+    
 
     def _evaluate_hand(self, table_cards):
         """
@@ -104,3 +135,4 @@ class EasyBot(player.Player):
         
         return 0.5  # Placeholder - implement proper hand strength calculation
 
+ 
